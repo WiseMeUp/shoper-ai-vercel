@@ -2,67 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/*.php",
-      "use": "vercel-php@0.6.0"
-    },
-    {
       "src": "*.php",
       "use": "vercel-php@0.6.0"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
-      "src": "/public/(.*)",
-      "dest": "/public/$1"
-    },
-    {
-      "src": "/admin/(.*)",
-      "dest": "/admin/$1.php"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.php"
-    },
-    {
-      "src": "/auth/(.*)",
-      "dest": "/auth/$1.php"
-    },
-    {
-      "src": "/billing_index.php",
-      "dest": "/billing_index.php"
-    },
-    {
-      "src": "/(.*).php",
-      "dest": "/$1.php"
-    },
-    {
-      "src": "/",
-      "dest": "/index.php"
-    },
-    {
-      "src": "/(.+)",
+      "src": "/(.*)",
       "dest": "/index.php"
     }
-  ],
-  "env": {
-    "APP_ENV": "production"
-  },
-  "build": {
-    "env": {
-      "PHP_VERSION": "8.2"
-    }
-  },
-  "functions": {
-    "api/*.php": {
-      "runtime": "vercel-php@0.6.0"
-    },
-    "*.php": {
-      "runtime": "vercel-php@0.6.0"
-    }
-  }
+  ]
 }
-
