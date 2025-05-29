@@ -1,0 +1,296 @@
+{% extends 'layouts/main.twig' %}
+
+{% block title %}
+    {% if link.id %}
+        {{ lang.admin_links.edit_title }}
+    {% else %}
+        {{ lang.admin_links.create_title }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="aurora-container">
+    <div class="aurora-header-container">
+        <div class="aurora-header">
+            <h1 class="aurora-title">
+                {% if link.id %}
+                    {{ lang.admin_links.edit_title }}
+                {% else %}
+                    {{ lang.admin_links.create_title }}
+                {% endif %}
+            </h1>
+            <p class="aurora-subtitle">
+                {% if link.id %}
+                    {{ lang.admin_links.edit_subtitle }}
+                {% else %}
+                    {{ lang.admin_links.create_subtitle }}
+                {% endif %}
+            </p>
+        </div>
+        <div class="aurora-actions">
+            <a href="{{ url_for('admin.links.index') }}" class="aurora-button aurora-button-secondary">
+                <i class="fas fa-arrow-left"></i> {{ lang.admin_links.buttons.back }}
+            </a>
+        </div>
+    </div>
+
+    {% if flash.success %}
+    <div class="aurora-alert aurora-alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span>{{ flash.success }}</span>
+    </div>
+    {% endif %}
+
+    {% if flash.error %}
+    <div class="aurora-alert aurora-alert-danger">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{ flash.error }}</span>
+    </div>
+    {% endif %}
+
+    <div class="aurora-card">
+        <div class="aurora-card-body">
+            <form id="link-form" method="POST" action="{{ link.id ? url_for('admin.links.update', {'params': {'id': link.id}}) : url_for('admin.links.store') }}" class="aurora-form">
+                {% if link.id %}
+                    <input type="hidden" name="_method" value="PUT">
+                    <input type="hidden" name="id" value="{{ link.id }}">
+                {% endif %}
+                
+                <div class="aurora-form-row">
+                    <div class="aurora-form-group">
+                        <label for="name" class="aurora-form-label">{{ lang.admin_links.fields.name }} *</label>
+                        <input type="text" id="name" name="name" value="{{ link.name|default('') }}" 
+                               class="aurora-form-control {{ validation.errors.name ? 'is-invalid' : '' }}" 
+                               required>
+                        {% if validation.errors.name %}
+                            <div class="aurora-invalid-feedback">{{ validation.errors.name }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="aurora-form-row">
+                    <div class="aurora-form-group">
+                        <label for="url" class="aurora-form-label">{{ lang.admin_links.fields.url }} *</label>
+                        <input type="text" id="url" name="url" value="{{ link.url|default('') }}" 
+                               class="aurora-form-control {{ validation.errors.url ? 'is-invalid' : '' }}" 
+                               required>
+                        {% if validation.errors.url %}
+                            <div class="aurora-invalid-feedback">{{ validation.errors.url }}</div>
+                        {% endif %}
+                        <small class="aurora-form-text">{{ lang.admin_links.url_help }}</small>
+                    </div>
+                </div>
+
+                <div class="aurora-form-row aurora-form-row-2">
+                    <div class="aurora-form-group">
+                        <label for="object" class="aurora-form-label">{{ lang.admin_links.fields.object }}</label>
+                        <select id="object" name="object" class="aurora-form-control">
+                            <option value="">{{ lang.admin_links.select_placeholder }}</option>
+                            {% for key, label in config.links.objects %}
+                                <option value="{{ key }}" {{ link.object == key ? 'selected' : '' }}>
+                                    {{ label[app_lang] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="aurora-form-group">
+                        <label for="action" class="aurora-form-label">{{ lang.admin_links.fields.action }}</label>
+                        <select id="action" name="action" class="aurora-form-control">
+                            <option value="">{{ lang.admin_links.select_placeholder }}</option>
+                            {% for key, label in config.links.actions %}
+                                <option value="{{ key }}" {{ link.action == key ? 'selected' : '' }}>
+                                    {{ label[app_lang] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="aurora-form-row aurora-form-row-2">
+                    <div class="aurora-form-group">
+                        <label for="placement" class="aurora-form-label">{{ lang.admin_links.fields.placement }} *</label>
+                        <select id="placement" name="placement" class="aurora-form-control {{ validation.errors.placement ? 'is-invalid' : '' }}" required>
+                            <option value="">{{ lang.admin_links.select_placeholder }}</option>
+                            {% for key, label in config.links.placements %}
+                                <option value="{{ key }}" {{ link.placement == key ? 'selected' : '' }}>
+                                    {{ label[app_lang] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if validation.errors.placement %}
+                            <div class="aurora-invalid-feedback">{{ validation.errors.placement }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="aurora-form-group">
+                        <label for="openType" class="aurora-form-label">{{ lang.admin_links.fields.openType }} *</label>
+                        <select id="openType" name="openType" class="aurora-form-control {{ validation.errors.openType ? 'is-invalid' : '' }}" required>
+                            {% for key, label in config.links.types %}
+                                <option value="{{ key }}" {{ link.openType == key ? 'selected' : '' }}>
+                                    {{ label[app_lang] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if validation.errors.openType %}
+                            <div class="aurora-invalid-feedback">{{ validation.errors.openType }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="aurora-form-row">
+                    <div class="aurora-form-group">
+                        <label for="permissions" class="aurora-form-label">{{ lang.admin_links.fields.permissions }}</label>
+                        <select id="permissions" name="permissions[]" class="aurora-form-control" multiple>
+                            {% for key, permission in available_permissions %}
+                                <option value="{{ key }}" {{ key in link.permissions ? 'selected' : '' }}>
+                                    {{ permission.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <small class="aurora-form-text">{{ lang.admin_links.permissions_help }}</small>
+                    </div>
+                </div>
+
+                <div class="aurora-form-row" id="scope-container" style="{{ link.permissions|length > 0 ? '' : 'display: none;' }}">
+                    <div class="aurora-form-group">
+                        <label for="scope" class="aurora-form-label">{{ lang.admin_links.fields.scope }}</label>
+                        <select id="scope" name="scope" class="aurora-form-control">
+                            <option value="">{{ lang.admin_links.select_placeholder }}</option>
+                            {% for key, label in available_scopes %}
+                                <option value="{{ key }}" {{ link.scope == key ? 'selected' : '' }}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="aurora-form-actions">
+                    <button type="submit" class="aurora-button aurora-button-primary">
+                        <i class="fas fa-save"></i> {{ lang.admin_links.buttons.submit }}
+                    </button>
+                    <a href="{{ url_for('admin.links.index') }}" class="aurora-button aurora-button-secondary">
+                        {{ lang.admin_links.buttons.cancel }}
+                    </a>
+                    {% if link.id %}
+                    <button type="button" class="aurora-button aurora-button-danger delete-link" 
+                            data-id="{{ link.id }}" data-name="{{ link.name }}">
+                        <i class="fas fa-trash"></i> {{ lang.admin_links.buttons.delete }}
+                    </button>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for delete confirmation -->
+{% if link.id %}
+<div class="aurora-modal" id="delete-modal">
+    <div class="aurora-modal-dialog">
+        <div class="aurora-modal-content">
+            <div class="aurora-modal-header">
+                <h5 class="aurora-modal-title">{{ lang.admin_links.delete_modal.title }}</h5>
+                <button type="button" class="aurora-close" data-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="aurora-modal-body">
+                <p>{{ lang.admin_links.delete_modal.confirmation }}</p>
+                <p class="link-name font-weight-bold">{{ link.name }}</p>
+            </div>
+            <div class="aurora-modal-footer">
+                <button type="button" class="aurora-button aurora-button-secondary" data-dismiss="modal">
+                    {{ lang.admin_links.buttons.cancel }}
+                </button>
+                <form id="delete-form" method="POST" action="{{ url_for('admin.links.delete', {'params': {'id': link.id}}) }}">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="aurora-button aurora-button-danger">
+                        {{ lang.admin_links.buttons.delete }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Валидация формы
+        const form = document.getElementById('link-form');
+        
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Проверка обязательных полей
+            const required = form.querySelectorAll('[required]');
+            required.forEach(function(field) {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            // Проверка URL
+            const urlField = document.getElementById('url');
+            if (urlField.value.trim() && !isValidUrl(urlField.value.trim())) {
+                urlField.classList.add('is-invalid');
+                const feedback = document.createElement('div');
+                feedback.className = 'aurora-invalid-feedback';
+                feedback.textContent = '{{ lang.admin_links.validation.invalid_url }}';
+                urlField.parentNode.appendChild(feedback);
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+        
+        // Показ/скрытие поля scope в зависимости от выбранных прав
+        const permissionsSelect = document.getElementById('permissions');
+        const scopeContainer = document.getElementById('scope-container');
+        
+        permissionsSelect.addEventListener('change', function() {
+            if (this.selectedOptions.length > 0) {
+                scopeContainer.style.display = '';
+            } else {
+                scopeContainer.style.display = 'none';
+            }
+        });
+        
+        // Обработка модального окна удаления
+        {% if link.id %}
+        const deleteModal = document.getElementById('delete-modal');
+        
+        document.querySelector('.delete-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            deleteModal.classList.add('show');
+        });
+        
+        deleteModal.querySelectorAll('[data-dismiss="modal"]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                deleteModal.classList.remove('show');
+            });
+        });
+        {% endif %}
+        
+        // Функция проверки URL
+        function isValidUrl(url) {
+            try {
+                new URL(url);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+    });
+</script>
+{% endblock %}
+

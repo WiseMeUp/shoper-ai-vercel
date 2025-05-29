@@ -1,0 +1,40 @@
+<tr>
+    <td>
+        <div class="aurora-link-item">
+            <i class="fas fa-link aurora-link-icon"></i>
+            <div class="aurora-link-details">
+                <div class="aurora-link-name">{{ link.name }}</div>
+                {% if link.object and link.action %}
+                    <div class="aurora-link-meta">
+                        {{ config.links.objects[link.object][app_lang] }} / {{ config.links.actions[link.action][app_lang] }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </td>
+    <td>
+        <div class="aurora-truncate" title="{{ link.url }}">{{ link.url }}</div>
+    </td>
+    <td>
+        <span class="aurora-badge aurora-badge-info">
+            {{ config.links.placements[link.placement][app_lang]|default(link.placement) }}
+        </span>
+    </td>
+    <td>
+        <span class="aurora-badge aurora-badge-{{ link.openType == 'iframe' ? 'warning' : 'primary' }}">
+            {{ config.links.types[link.openType][app_lang]|default(link.openType) }}
+        </span>
+    </td>
+    <td class="text-end">
+        <div class="aurora-actions-group">
+            <a href="{{ url_for('admin.links.edit', {'params': {'id': link.id}}) }}" class="aurora-button aurora-button-sm aurora-button-outline-primary" title="{{ lang.admin_links.buttons.edit }}">
+                <i class="fas fa-edit"></i>
+            </a>
+            <button type="button" class="aurora-button aurora-button-sm aurora-button-outline-danger delete-link" 
+                    data-id="{{ link.id }}" data-name="{{ link.name }}" title="{{ lang.admin_links.buttons.delete }}">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </td>
+</tr>
+

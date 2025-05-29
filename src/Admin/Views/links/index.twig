@@ -1,0 +1,129 @@
+{% extends 'layouts/main.twig' %}
+
+{% block title %}{{ lang.admin_links.title }}{% endblock %}
+
+{% block content %}
+<div class="aurora-container">
+    <div class="aurora-header-container">
+        <div class="aurora-header">
+            <h1 class="aurora-title">{{ lang.admin_links.title }}</h1>
+            <p class="aurora-subtitle">{{ lang.admin_links.subtitle }}</p>
+        </div>
+        <div class="aurora-actions">
+            <a href="{{ url_for('admin.links.create') }}" class="aurora-button aurora-button-primary">
+                <i class="fas fa-plus"></i> {{ lang.admin_links.buttons.add }}
+            </a>
+        </div>
+    </div>
+
+    {% if flash.success %}
+    <div class="aurora-alert aurora-alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span>{{ flash.success }}</span>
+    </div>
+    {% endif %}
+
+    {% if flash.error %}
+    <div class="aurora-alert aurora-alert-danger">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{ flash.error }}</span>
+    </div>
+    {% endif %}
+
+    <div class="aurora-card">
+        <div class="aurora-card-body">
+            {% if links|length > 0 %}
+            <table class="aurora-table">
+                <thead>
+                    <tr>
+                        <th>{{ lang.admin_links.fields.name }}</th>
+                        <th>{{ lang.admin_links.fields.url }}</th>
+                        <th>{{ lang.admin_links.fields.placement }}</th>
+                        <th>{{ lang.admin_links.fields.openType }}</th>
+                        <th class="text-end">{{ lang.admin_links.fields.actions }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for link in links %}
+                        {% include 'links/_row.twig' with {link: link} %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="aurora-empty-state">
+                <i class="fas fa-link aurora-empty-state-icon"></i>
+                <h3>{{ lang.admin_links.no_links_title }}</h3>
+                <p>{{ lang.admin_links.no_links_text }}</p>
+                <a href="{{ url_for('admin.links.create') }}" class="aurora-button aurora-button-primary">
+                    <i class="fas fa-plus"></i> {{ lang.admin_links.buttons.add }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal for delete confirmation -->
+<div class="aurora-modal" id="delete-modal">
+    <div class="aurora-modal-dialog">
+        <div class="aurora-modal-content">
+            <div class="aurora-modal-header">
+                <h5 class="aurora-modal-title">{{ lang.admin_links.delete_modal.title }}</h5>
+                <button type="button" class="aurora-close" data-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="aurora-modal-body">
+                <p>{{ lang.admin_links.delete_modal.confirmation }}</p>
+                <p class="link-name font-weight-bold"></p>
+            </div>
+            <div class="aurora-modal-footer">
+                <button type="button" class="aurora-button aurora-button-secondary" data-dismiss="modal">
+                    {{ lang.admin_links.buttons.cancel }}
+                </button>
+                <form id="delete-form" method="POST" action="">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="aurora-button aurora-button-danger">
+                        {{ lang.admin_links.buttons.delete }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обработка модального окна удаления
+        const deleteModal = document.getElementById('delete-modal');
+        const deleteForm = document.getElementById('delete-form');
+        const linkNameElement = deleteModal.querySelector('.link-name');
+        
+        // Обработчик для кнопок удаления
+        document.querySelectorAll('.delete-link').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const linkId = this.dataset.id;
+                const linkName = this.dataset.name;
+                
+                // Заполняем данные в модальном окне
+                linkNameElement.textContent = linkName;
+                deleteForm.action = '{{ url_for("admin.links.delete", {"params": {"id": ""}}) }}' + linkId;
+                
+                // Показываем модальное окно
+                deleteModal.classList.add('show');
+            });
+        });
+        
+        // Обработчик закрытия модального окна
+        deleteModal.querySelectorAll('[data-dismiss="modal"]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                deleteModal.classList.remove('show');
+            });
+        });
+    });
+</script>
+{% endblock %}
+
